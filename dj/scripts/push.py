@@ -10,7 +10,7 @@ from main.models import Show, Location, Episode
 
 class push(process):
 
-    ready_state = 3
+    ready_state = 12
     ret = None
 
     def process_ep(self, ep):

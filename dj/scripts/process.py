@@ -22,7 +22,7 @@ django.setup()
 # import django
 from main.models import Client, Show, Location, Episode, State, Log
 
-import rax_uploader
+#import rax_uploader
 
 class process(object):
   """
