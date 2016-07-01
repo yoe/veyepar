@@ -3522,6 +3522,9 @@ class add_eps(process.process):
         if self.options.show =='debconf15':
             return self.summit_penta(schedule,show)
 
+        if self.options.show =='debconf16':
+            return self.summit_penta(schedule,show)
+
         if self.options.show =='bosc_2014':
             return self.bosc_2014(schedule,show)
 
