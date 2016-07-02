@@ -493,6 +493,9 @@ class add_eps(process.process):
                           start=row['start'],
                           duration=row['duration'],
                           name=row['name'],
+                          twitter_id=row['twitter_id'],
+                          language='',
+                          summary=row['description'],
                           )
                     episode.sequence=seq
                     episode.state=1
