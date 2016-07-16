@@ -286,7 +286,7 @@ class enc(process):
                 # if rf.filename.startswith('\\'):
                 #     rawpathname = rf.filename
                 # else:
-                raw_pathname = os.path.join( "../dv", 
+                raw_pathname = os.path.join( "/home/veyepar/Videos/veyepar/%s/%s/dv" % (ep.show.client.slug, ep.show.slug), 
                         rf.location.slug, rf.filename)
                     # self.episode_dir, rf.filename)
 
@@ -328,7 +328,7 @@ class enc(process):
             return clips
 
 
-        def get_cuts(cls):
+        def get_cuts(cls, ep):
 
             """
             gets the list of cuts.
@@ -360,7 +360,7 @@ class enc(process):
 
                 cut['id'] = cl.id
 
-                rawpathname = os.path.join( "../dv", 
+                rawpathname = os.path.join( "/home/veyepar/Videos/veyepar/%s/%s/dv" % (ep.show.client.slug, ep.show.slug), 
                         cl.raw_file.location.slug, cl.raw_file.filename)
                     # self.episode_dir, cl.raw_file.filename)
                 # print(rawpathname)
@@ -394,7 +394,7 @@ class enc(process):
         params['title_img'] = get_title(episode)
         params['foot_img'] = get_foot(episode)
         params['clips'] = get_clips(rfs, episode)
-        params['cuts'] = get_cuts(cls)
+        params['cuts'] = get_cuts(cls, episode)
 
         return params
 
@@ -403,6 +403,14 @@ class enc(process):
         def enc_one(ext):
             out_pathname = os.path.join(
                 self.show_dir, ext, "%s.%s" % (episode.slug, ext))
+            work_pathname = os.path.join(
+                self.show_dir, "tmp", "%s.dv" % (episode.slug))
+            stats_pathname = os.path.join(
+                self.show_dir, "tmp", "%s.dat" % (episode.slug))
+            wav_pathname = os.path.join(
+                self.show_dir, "tmp", "%s.wav" % (episode.slug))
+            norm_pathname = os.path.join(
+                self.show_dir, "tmp", "%s.flac" % (episode.slug))
 
             if ext == 'webm':
 
@@ -411,12 +419,22 @@ class enc(process):
                     'mlt': mlt_pathname,
                     'out': out_pathname,
                     'threads': self.options.threads,
+                    'statsfile': stats_pathname,
+                    'wav': wav_pathname,
+                    'work': work_pathname,
+		    'norm': norm_pathname,
+                    'showdir': self.show_dir,
                     'test': '',
                 }
 
                # cmds=["melt %s -profile dv_ntsc -consumer avformat:%s progress=1 acodec=libvorbis ab=128k ar=44100 vcodec=libvpx minrate=0 b=600k aspect=@4/3 maxrate=1800k g=120 qmax=42 qmin=10"% (mlt_pathname,out_pathname,)]
                 cmds = [
-                    "melt -profile %(dv_format)s %(mlt)s force_aspect_ratio=@64/45 -consumer avformat:%(out)s progress=1 threads=0 ab=256k vb=2000k quality=good deadline=good deinterlace=1 deinterlace_method=yadif" % parms]
+                    "melt -profile %(dv_format)s %(mlt)s force_aspect_ratio=@64/45 -consumer avformat:%(work)s progress=1 threads=%(threads)s" % parms,
+                    "gst-launch-1.0 webmmux name=mux ! fakesink uridecodebin uri=file://%(work)s name=demux demux. ! videoconvert ! vp8enc multipass-cache-file=%(statsfile)s multipass-mode=1 threads=%(threads)s ! queue ! mux.video_0 demux. ! progressreport ! audioconvert ! audiorate ! tee name=t ! queue ! vorbisenc ! queue ! mux.audio_0 t. ! queue ! wavenc ! filesink location=%(wav)s " % parms,
+                    "bs1770gain -a --output %(showdir)s/tmp %(wav)s" % parms,
+                    "gst-launch-1.0 webmmux name=mux ! filesink location=%(out)s uridecodebin uri=file://%(work)s name=video uridecodebin uri=file://%(norm)s name=audio video. ! videoconvert ! vp8enc multipass-cache-file=%(statsfile)s multipass-mode=2 threads=%(threads)s ! queue ! mux.video_0 audio. ! progressreport ! audioconvert ! audiorate ! vorbisenc ! queue ! mux.audio_0" % parms,
+                    "rm %(wav)s %(norm)s %(statsfile)s %(work)s" % parms,
+                    ]
 
             if ext == 'flv':
                 cmds = [

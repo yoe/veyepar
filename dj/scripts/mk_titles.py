@@ -7,7 +7,7 @@
 import os
 import subprocess
 
-import rax_uploader
+#import rax_uploader
 
 from enc import enc
 
