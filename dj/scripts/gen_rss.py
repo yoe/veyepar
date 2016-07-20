@@ -43,4 +43,4 @@ if __name__ == '__main__':
     fh = open('rss2.xml', 'w')
     eps = Episode.objects.filter(state='12').filter(show__in='4')
     make_video_rss(fh, eps)
-    close(fh)
+    fh.close()

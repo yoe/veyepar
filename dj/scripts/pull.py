@@ -1,40 +1,48 @@
 #!/usr/bin/python
 
-# push encoded files to apu.debconf.org.
-# uses rsync.
+# push encoded files to data center box
+# uses rsync. 
 
 import os, subprocess
 
 from process import process
 from main.models import Show, Location, Episode
 
-class push2apu(process):
+class pull(process):
 
-    ready_state = 9
+    ready_state = 3
     ret = None
 
     def process_ep(self, ep):
+        #return True
+
         # get a list of video files to upload
         files = []
         for ext in self.options.upload_formats:
             src_pathname = os.path.join( self.show_dir, ext, "%s.%s"%(ep.slug,ext))
             files.append({'ext':ext,'pathname':src_pathname})
       
+        # dest_host = 'veyepar@nextdayvideo.com'
+        # dest_path = "/home/veyepar/Videos/veyepar/enthought/scipy_2012/mp4"
         for f in files:
 
             # Ryans data center box, 
             # veyepar user and /home dir
             user="veyepar"
-            host =  'apu.debconf.org'
-            dest_host = '%s@%s' % (user,host)
-            dest_path = "/srv/video/video.debian.net/%s/%s/" % (ep.start.year, ep.show.slug)
+            host =  'storage1.dc16.debconf.org'
+            src_host = '%s@%s' % (user,host)
+            dest_path = "/home/%s/Videos/veyepar/%s/%s/%s" % (
+                    user, 
+                    ep.show.client.slug, ep.show.slug,
+                    f['ext'] )
 
-            dest = "%s:%s" %( dest_host, dest_path )
+            src = "%s:%s" %( src_host, f['pathname'] )
 
-            cmds = ['rsync -rtvP %s %s' % (f['pathname'], dest),
-		    'ssh %s bash -c "cd %s; git annex add %s.%s"' % (host, dest_path, ep.slug, ext) ] 
+            # 'ssh -p 222' = use ssh on port 222
 
-            ret = self.run_cmds(ep, cmds)
+            cmd = ['rsync',  '-rtvP', src, dest_path ] 
+
+            ret = self.run_cmd(cmd)
 
             self.ret = ret ## for test runner
 
@@ -62,9 +70,9 @@ ret: 12
             connection.connection = None
             ep.save()
 
-        return True
+        return ret
 
 if __name__ == '__main__':
-    p=push2apu()
+    p=pull()
     p.main()
 
