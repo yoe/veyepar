@@ -440,7 +440,7 @@ class add_eps(process.process):
                     # if self.show.slug=="debconf15":
                     #    host= "encoding2.dc15.debconf.org" 
                     # else:
-                    host= "veyepar.nextdayvideo.com" 
+                    host= "veyepar.debian.org" 
                     print("http://%s/main/E/%s/" % ( host, episode.id, ))
                     print(episode.conf_key, episode.conf_url)
                     if self.options.verbose: 
@@ -3327,11 +3327,11 @@ class add_eps(process.process):
         # url='http://2010.osdc.com.au/program/json'
         # url='http://conf.followtheflow.org/programme/schedule/json'
         # url='http://lca2011.linux.org.au/programme/schedule/json'
-        # url='http://veyepar.nextdayvideo.com/main/C/chipy/S/may_2011.json'
+        # url='http://veyepar.debian.org/main/C/chipy/S/may_2011.json'
         # url='http://lca2011.linux.org.au/programme/schedule/json'
         # url='http://2011.pyohio.org/programme/schedule/json'
         # url='http://pyohio.nextdayvideo.com/programme/schedule/json'
-        # url='http://veyepar.nextdayvideo.com/main/C/jschi/S/june_2011.json'
+        # url='http://veyepar.debian.org/main/C/jschi/S/june_2011.json'
         # url='http://pyohio.org/schedule/json/'
         # url='https://www.desktopsummit.org/program/veyepar.csv'
         # url='http://pycon-au.org/2011/conference/schedule/events.json'
