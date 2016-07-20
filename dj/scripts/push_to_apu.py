@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-# push encoded files to data center box
-# uses rsync. 
+# push encoded files to apu.debconf.org.
+# uses rsync.
 
 import os, subprocess
 
@@ -10,7 +10,7 @@ from main.models import Show, Location, Episode
 
 class push(process):
 
-    ready_state = 3
+    ready_state = 9
     ret = None
 
     def process_ep(self, ep):
@@ -22,28 +22,21 @@ class push(process):
             src_pathname = os.path.join( self.show_dir, ext, "%s.%s"%(ep.slug,ext))
             files.append({'ext':ext,'pathname':src_pathname})
       
-        # dest_host = 'veyepar@nextdayvideo.com'
-        # dest_path = "/home/veyepar/Videos/veyepar/enthought/scipy_2012/mp4"
         for f in files:
 
             # Ryans data center box, 
             # veyepar user and /home dir
             user="veyepar"
-            host =  'vittoria.debian.org'
+            host =  'apu.debconf.org'
             dest_host = '%s@%s' % (user,host)
-            dest_path = "/home/%s/Videos/veyepar/%s/%s/%s" % (
-                    user, 
-                    ep.show.client.slug, ep.show.slug,
-                    f['ext'] )
+            dest_path = "/srv/video/video.debian.org/%s/%s" % (ep.start.year, ep.show.slug)
 
             dest = "%s:%s" %( dest_host, dest_path )
 
-            # 'ssh -p 222' = use ssh on port 222
+            cmds = ['rsync -rtvP %s %s' % (f['pathname'], dest),
+		    'ssh %s bash -c "cd /srv/video/video.debian.net/2016/%s; git annex add ."' % (ep.show.slug) ] 
 
-            cmd = ['rsync',  '-rtvP', '-e', 'ssh -p 222', 
-                    f['pathname'], dest ] 
-
-            ret = self.run_cmd(cmd)
+            ret = self.run_cmds(cmd)
 
             self.ret = ret ## for test runner
 
